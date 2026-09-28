@@ -29,6 +29,11 @@ class MarketSearchRequest(BaseModel):
         description="Localização geográfica para a busca",
         examples=["Fortaleza, Ceara"],
     )
+    usar_ia: bool = Field(
+        default=True,
+        description="Se verdadeiro, passa os resultados pelo filtro do LLM (lento, porém preciso)",
+        examples=[True],
+    )
 
 
 class MarketProduct(BaseModel):

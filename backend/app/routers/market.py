@@ -25,6 +25,7 @@ def search_market(body: MarketSearchRequest) -> MarketSearchResponse:
         nome_produto=body.nome_produto,
         loja_cliente=body.loja_cliente,
         localizacao=body.localizacao,
+        usar_ia=body.usar_ia
     )
 
     if resultado is None:

@@ -41,13 +41,24 @@ def _filtrar_unidades_via_llm(produtos: list[dict], nome_alvo: str) -> list[dict
         })
 
     prompt_sistema = (
-        f"Você é um classificador rigoroso de dados de varejo em um pipeline automatizado. "
-        f"O produto alvo buscado é EXATAMENTE: '{nome_alvo}'. "
-        f"Analise a lista JSON de ofertas fornecida. Sua tarefa é EXCLUIR qualquer item que:\n"
-        f"1. Seja um kit, pack, combo ou venda no atacado (ex: 'c/ 6 caixas', 'leve 3').\n"
-        f"2. Tenha uma especificação de quantidade/peso/volume diferente da solicitada (ex: se o alvo pede '4 comprimidos', exclua estritamente as ofertas de '6 comprimidos', '8 comprimidos', etc. Se pedir '500ml', exclua '1L').\n"
-        f"3. Seja um acessório, refil ou produto diferente do alvo.\n"
-        f"Retorne ÚNICA E EXCLUSIVAMENTE um array JSON com os 'ids' aprovados. Não adicione markdown, crases ou texto explicativo."
+        f"Você é um assistente de e-commerce analítico. O produto alvo é: '{nome_alvo}'.\n"
+        f"Sua tarefa é analisar a lista JSON de ofertas fornecida e extrair os produtos válidos.\n"
+        f"Para evitar erros, você DEVE estruturar sua resposta como um objeto JSON seguindo exatamente este formato:\n"
+        f"{{\n"
+        f"  \"analise_alvo\": {{\n"
+        f"    \"marca\": \"...\",\n"
+        f"    \"produto_base\": \"...\",\n"
+        f"    \"quantidade_tamanho\": \"...\",\n"
+        f"    \"atributos_flexiveis\": \"(ex: crocante, levemente salgado - coisas que podem faltar no título do concorrente mas não desqualificam a oferta)\"\n"
+        f"  }},\n"
+        f"  \"ids_aprovados\": [\"0\", \"2\"]\n"
+        f"}}\n\n"
+        f"Regras para aprovar (manter) um item no array 'ids_aprovados':\n"
+        f"1. A marca e o produto base devem bater.\n"
+        f"2. A quantidade deve ser compatível (ou não estar informada, assumindo que seja o mesmo padrão).\n"
+        f"3. Ignore atributos flexíveis ausentes. (ex: se o alvo é 'Amendoim Crocante Levemente Salgado', aprove 'Amendoim Crocante' da mesma marca e peso).\n"
+        f"4. Exclua KITS, COMBOS (ex: 'leve 3', 'c/ 6') ou sabores/variantes TOTALMENTE diferentes.\n"
+        f"Responda APENAS com o JSON válido, sem nenhum texto fora das chaves {{}}."
     )
 
     headers = {
@@ -87,10 +98,12 @@ def _filtrar_unidades_via_llm(produtos: list[dict], nome_alvo: str) -> list[dict
         content = content.strip()
         logger.debug(f"[LLM BATCH CURATOR] Resposta bruta da IA: {content}")
 
-        ids_aprovados = json.loads(content)
+        resposta_json = json.loads(content)
 
-        if not isinstance(ids_aprovados, list):
-            raise ValueError("O LLM não retornou uma lista JSON.")
+        if not isinstance(resposta_json, dict) or "ids_aprovados" not in resposta_json:
+            raise ValueError("O LLM não retornou o objeto JSON esperado com a chave 'ids_aprovados'.")
+            
+        ids_aprovados = resposta_json["ids_aprovados"]
 
         # 2. Intersecção: mapear de volta os aprovados mantendo o DTO completo
         produtos_filtrados = [
@@ -121,6 +134,7 @@ def buscar_e_tratar(
     nome_produto: str,
     loja_cliente: str = "",
     localizacao: str = "",
+    usar_ia: bool = True
 ) -> Optional[dict]:
     """
     Orquestra a busca no Google Shopping (Serper), limpeza (blacklist) 
@@ -157,12 +171,13 @@ def buscar_e_tratar(
             "image_url": row.get("imageUrl") if row.get("imageUrl") is not None else None,
         })
 
-    # 4. LLM Batch Curator (Resolução de Entidades / Remoção de Kits)
-    logger.info(f"Enviando {len(produtos)} produtos curados do dataframe para o LLM Batch Curator...")
-    produtos = _filtrar_unidades_via_llm(produtos, nome_produto)
-    
-    if not produtos:
-        return None
+    # 4. LLM Batch Curator (Condicional)
+    if usar_ia:
+        logger.info(f"Enviando {len(produtos)} produtos curados do dataframe para o LLM Batch Curator...")
+        produtos = _filtrar_unidades_via_llm(produtos, nome_produto)
+        
+        if not produtos:
+            return None
 
     # 5. Estatísticas agregadas calculadas com a base curada
     precos = [p["price"] for p in produtos]
