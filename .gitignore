@@ -1,0 +1,46 @@
+# ===============================
+# Frontend (Next.js / Node.js)
+# ===============================
+# Dependências
+frontend/node_modules/
+frontend/package-lock.json
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Variáveis de ambiente e Segredos
+.env
+*.env
+.env.*
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# ===============================
+# Backend (FastAPI / Python)
+# ===============================
+# Ambientes Virtuais
+venv/
+backend/venv/
+backend/env/
+backend/.venv/
+backend/.env
+
+# Python 
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/.pytest_cache/
+
+# ===============================
+# Geral (Sistema Operacional)
+# ===============================
+.DS_Store
+Thumbs.db
+*.log

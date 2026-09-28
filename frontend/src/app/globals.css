@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --lulu-blue: #0891B2; /* Azul Turquesa - Conecta Price */
+  --lulu-pink: #FF6B00; /* Laranja - Conecta Price */
+}
+
+body {
+  min-height: 100vh;
+  background-color: #F9FAFB;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+/* Smooth transitions for all interactive elements */
+input, button, select, textarea {
+  transition: all 0.2s ease;
+}
+
+/* Custom range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #E2E8F0;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1E3A8A;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #E83E8C;
+  transform: scale(1.1);
+}
+
+/* Number input — hide arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.5;
+}
+
+/* Animação do Urso Rugindo */
+@keyframes roar {
+  0% { transform: scale(1) translateY(0); }
+  20% { transform: scale(1.15) translateY(-5px) rotate(-4deg); }
+  40% { transform: scale(1.15) translateY(-5px) rotate(4deg); }
+  60% { transform: scale(1.15) translateY(-5px) rotate(-4deg); }
+  80% { transform: scale(1.15) translateY(-5px) rotate(4deg); }
+  100% { transform: scale(1.1) translateY(-2px); }
+}
+
+.urso-rugindo {
+  transition: all 0.3s ease;
+  transform-origin: center center;
+}
+
+.group:hover .urso-rugindo {
+  animation: roar 0.6s ease-in-out forwards;
+  filter: drop-shadow(0 10px 20px rgba(255, 107, 0, 0.5)); /* Glow laranja Conecta Price */
+}
+
+/* Animações de Abertura */
+@keyframes slideRightEntry {
+  0% { transform: translateX(-150%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes popInText {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-slide-right {
+  animation: slideRightEntry 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pop-in-delay {
+  opacity: 0;
+  animation: popInText 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+}
