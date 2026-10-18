@@ -30,14 +30,12 @@ def calculate_pricing(body: PricingRequest) -> PricingResponse:
         fator_posicionamento_eve=body.fator_posicionamento_eve,
     )
 
-    # O engine retorna apenas "mensagem" quando há ZeroDivisionError
     if "viavel" not in resultado:
         raise HTTPException(
             status_code=422,
             detail=resultado.get("mensagem", "Erro interno no cálculo."),
         )
 
-    # Normalizar status para o Voo Cego (o engine original não retorna "status" nesse caso)
     status = resultado.get("status", "VOO_CEGO")
 
     return PricingResponse(

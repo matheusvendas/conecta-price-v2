@@ -34,6 +34,16 @@ class MarketSearchRequest(BaseModel):
         description="Se verdadeiro, passa os resultados pelo filtro do LLM (lento, porém preciso)",
         examples=[True],
     )
+    without_blacklist: bool = Field(
+        default=False,
+        description="Se verdadeiro, desativa a blacklist padrão de grandes marketplaces (Amazon, Shopee, etc.)",
+        examples=[False],
+    )
+    lojas_blacklist: list[str] = Field(
+        default=[],
+        description="Lista de lojas a serem excluídas da busca",
+        examples=["Pichau", "Kabum"],
+    )
 
 
 class MarketProduct(BaseModel):

@@ -5,7 +5,7 @@ def calcular_preco_ideal(
     frete_fixo: float,
     taxa_comissao: float,
     margem_alvo: float,
-    preco_concorrente: Optional[float],  # Agora aceita explicitamente None
+    preco_concorrente: Optional[float],
     fator_posicionamento_eve: float
 ) -> Dict[str, Any]:
     
@@ -16,10 +16,10 @@ def calcular_preco_ideal(
     except ZeroDivisionError:
         return {"mensagem": "Erro: Taxas somam 100% ou mais. Inviável matematicamente."}
 
-    # 2) Rota de Voo Cego (Falha de Mercado / Sem âncora)
+    # 2) Rota de Falha de Mercado / Sem âncora
     if preco_concorrente is None or preco_concorrente <= 0:
         return {
-            "viavel": True, # Presumimos viável pois garantimos a margem matemática
+            "viavel": True,
             "piso": round(piso, 2),
             "teto": None,
             "preco_sugerido": round(preco_com_margem, 2),

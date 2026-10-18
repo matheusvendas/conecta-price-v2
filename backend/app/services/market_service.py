@@ -134,7 +134,9 @@ def buscar_e_tratar(
     nome_produto: str,
     loja_cliente: str = "",
     localizacao: str = "",
-    usar_ia: bool = True
+    usar_ia: bool = True,
+    without_blacklist: bool = False,
+    lojas_blacklist: list[str] = []
 ) -> Optional[dict]:
     """
     Orquestra a busca no Google Shopping (Serper), limpeza (blacklist) 
@@ -155,7 +157,12 @@ def buscar_e_tratar(
         return None
 
     # 2. Limpar e filtrar (blacklist, parse de preços básicos)
-    df_limpo = tratamento(df_bruto, loja_cliente)
+    df_limpo = tratamento(
+        df_bruto,
+        loja_cliente=loja_cliente,
+        without_blacklist=without_blacklist,
+        lojas_blacklist=lojas_blacklist
+    )
 
     if df_limpo.empty:
         return None
@@ -175,6 +182,7 @@ def buscar_e_tratar(
     if usar_ia:
         logger.info(f"Enviando {len(produtos)} produtos curados do dataframe para o LLM Batch Curator...")
         produtos = _filtrar_unidades_via_llm(produtos, nome_produto)
+
         
         if not produtos:
             return None
