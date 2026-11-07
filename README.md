@@ -1,6 +1,6 @@
 # 💸 Conecta Price V2 (Pricing Inteligente)
 
-Um sistema avançado de precificação para e-commerce e varejo, movido a Inteligência Artificial e dados de mercado em tempo real. Este projeto utiliza uma **Arquitetura API-First** totalmente desacoplada, permitindo que a inteligência de negócios seja consumida por múltiplos frontends (Next.js, Streamlit, Mobile, etc).
+Um sistema avançado de precificação para e-commerce e varejo, movido a Inteligência Artificial e dados de mercado em tempo real. Este projeto utiliza uma **Arquitetura API-First** totalmente desacoplada, conectando um motor analítico e matemático em **FastAPI (Python)** a uma interface moderna em **Next.js 14 (React + TypeScript + Tailwind CSS)** e persistência em nuvem via **Supabase (PostgreSQL)**.
 
 ---
 
@@ -10,16 +10,13 @@ A arquitetura foi desenhada separando um **Backend Stateless de Computação e I
 
 ```mermaid
 flowchart TD
-    subgraph Client["🖥️ Camada de Apresentação (Cliente)"]
+    subgraph Client["🖥️ Camada de Apresentação — Frontend Next.js 14 (React + Tailwind)"]
         U(["👤 Usuário / Analista de Pricing"])
-        subgraph NextJS["Frontend Principal — Next.js 14 (React + Tailwind)"]
-            S1["1. Pesquisa de Mercado\n(MarketSearch.tsx)"]
-            S2["2. Curadoria Humana & Âncora\n(CompetitorSelect.tsx)"]
-            S3["3. Parâmetros Financeiros & EVE\n(PricingForm.tsx)"]
-            S4["4. Recomendação Executiva\n(PricingResult.tsx)"]
-            HIST["Histórico & Auditoria\n(historico/page.tsx)"]
-        end
-        ST["Frontend Clássico\n(Streamlit — app.py)"]
+        S1["1. Pesquisa de Mercado\n(MarketSearch.tsx)"]
+        S2["2. Curadoria Humana & Âncora\n(CompetitorSelect.tsx)"]
+        S3["3. Parâmetros Financeiros & EVE\n(PricingForm.tsx)"]
+        S4["4. Recomendação Executiva\n(PricingResult.tsx)"]
+        HIST["Histórico & Auditoria\n(historico/page.tsx)"]
     end
 
     subgraph BaaS["🔐 Persistência & Identidade (Supabase BaaS)"]
@@ -54,12 +51,9 @@ flowchart TD
         GROQ["Groq Cloud API\n(LLM openai/gpt-oss-120b)"]
     end
 
-    %% Fluxo do Usuário e Frontends
+    %% Fluxo do Usuário e Frontend
     U --> S1
-    U -.-> ST
     S1 -->|JSON Request| R1
-    ST -.->|JSON Request| R1
-    ST -.->|JSON Request| R2
 
     %% Fluxo do Pipeline de Mercado
     R1 --> M_API
@@ -84,7 +78,7 @@ flowchart TD
     OUT_CEGO & OUT_INV & OUT_COMP & OUT_OTIMO -->|PricingResponse| S4
 
     %% Fluxo de Autenticação e Banco de Dados
-    NextJS <-->|Login / Sessão| AUTH
+    Client <-->|Login / Sessão| AUTH
     S3 -->|INSERT Simulação| PG
     PG -->|SELECT Histórico por user_id| HIST
 ```
@@ -197,23 +191,23 @@ Suponha um produto com os seguintes parâmetros operacionais:
    - **Fator EVE (Estratégia de Valor e Escassez):** Posicionamento dinâmico que vai desde o Giro Agressivo (Queima de Estoque) até Vantagem Tática em Leilões de Buy Box, ou Prêmio de Serviço.
    - "Voo Cego": Precificação matemática baseada puramente em custos quando não há âncora de mercado.
 
-3. **Múltiplas Interfaces:**
-   - **Frontend V2:** Uma aplicação moderna em Next.js (React) com Tailwind CSS e persistência de histórico via Supabase.
-   - **Frontend V1:** Uma interface clássica e rápida em Streamlit focada em cálculos pontuais, consumindo a mesma API (Backend V2).
+3. **Interface Guiada & Auditoria de Simulações:**
+   - Aplicação web moderna em **Next.js 14 (React + TypeScript)** com **Tailwind CSS**, estruturada em um fluxo decisório de 4 etapas.
+   - Autenticação de usuários e persistência de histórico de simulações no **Supabase (PostgreSQL)**.
 
 ## 🛠️ Tecnologias Utilizadas
 
 ### Backend (Cérebro)
-* **Python & FastAPI:** Motor de alta performance assíncrono.
-* **Groq / OpenRouter:** Provedores de LLM para curadoria de dados de mercado.
-* **Serper API:** Raspagem de dados do Google Shopping.
-* **Loguru:** Rastreamento e logs detalhados do pipeline de dados.
+* **Python & FastAPI:** Motor de alta performance para exposição da API REST.
+* **Pandas:** Saneamento vetorizado de dados e aplicação de *blacklists* por expressão regular.
+* **Groq Cloud:** Provedor de inferência LLM de baixa latência para curadoria semântica de ofertas.
+* **Serper API:** Consulta em tempo real aos dados do Google Shopping.
+* **Loguru:** Rastreamento e logs estruturados do pipeline de dados.
 
-### Frontend (Interfaces)
-* **Next.js & React:** Interface rica, responsiva e dinâmica.
-* **Tailwind CSS:** Estilização utility-first (Design System).
-* **Supabase:** Backend-as-a-Service para persistência do histórico de buscas no Banco de Dados PostgreSQL (Autenticação e DB).
-* **Streamlit:** Interface legacy em Python perfeitamente acoplada ao novo backend via `requests`.
+### Frontend & Persistência
+* **Next.js 14 & React 18 (TypeScript):** Interface rica, responsiva e tipada ponta a ponta com os contratos do backend.
+* **Tailwind CSS:** Estilização *utility-first* (Design System Conecta Price).
+* **Supabase (Auth & PostgreSQL):** *Backend-as-a-Service* para gestão de sessão JWT e armazenamento do histórico de precificações.
 
 ---
 
@@ -242,17 +236,13 @@ No seu terminal principal, ative o ambiente virtual e rode o FastAPI:
 ```bash
 cd backend
 pip install -r requirements.txt
-fastapi dev app/main.py
+uvicorn app.main:app --reload --port 8000
 ```
 O servidor estará rodando em `http://localhost:8000`. Você pode ver a documentação interativa da API em `http://localhost:8000/docs`.
 
 ---
 
-### 3. Rodando as Interfaces (Frontends)
-
-Você pode escolher qual "carcaça" rodar (ou até rodar as duas juntas!):
-
-#### Opção A: Frontend Next.js (Principal)
+### 3. Rodando a Interface (Frontend Next.js)
 Abra um novo terminal e rode:
 ```bash
 cd frontend
@@ -260,14 +250,6 @@ npm install
 npm run dev
 ```
 Acesse `http://localhost:3000` no navegador.
-
-#### Opção B: Frontend Streamlit (Clássico)
-Abra um novo terminal (certifique-se de que o ambiente virtual Python está ativo) e rode:
-```bash
-pip install streamlit requests
-streamlit run streamlit/app.py
-```
-O navegador abrirá automaticamente a interface do Streamlit conectada à sua API.
 
 ---
 
