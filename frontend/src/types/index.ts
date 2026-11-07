@@ -8,6 +8,9 @@ export interface MarketSearchRequest {
   nome_produto: string;
   loja_cliente?: string;
   localizacao?: string;
+  usar_ia?: boolean;
+  without_blacklist?: boolean;
+  lojas_blacklist?: string[];
 }
 
 export interface MarketProduct {
