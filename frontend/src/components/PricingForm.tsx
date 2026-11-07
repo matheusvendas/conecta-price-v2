@@ -43,39 +43,30 @@ export default function PricingForm({ anchor, productName, competitorName, onRes
         fator_posicionamento_eve: evePct / 100,
       });
 
-      // 🔴 INTEGRAÇÃO COM SUPABASE: Salvar no histórico se logado!
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        console.log("Tentando salvar no Supabase...");
-        console.log("Dados:", {
-          user_id: session.user.id,
-          produto_alvo: productName || "Sem Produto",
-          concorrente: competitorName || "Voo Cego",
-          preco_concorrente: anchor,
-          margem_desejada: Number(margemPct),
-          preco_sugerido: result.preco_sugerido
-        });
+      // 🔴 INTEGRAÇÃO COM SUPABASE: Salvar no histórico se logado (isolado para não travar o cálculo se o Supabase falhar)
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { error: insertError } = await supabase.from('historico_buscas').insert({
+            user_id: session.user.id,
+            produto_alvo: productName || "Sem Produto", 
+            concorrente: competitorName || "Voo Cego",
+            preco_concorrente: anchor,
+            margem_desejada: Number(margemPct),
+            preco_sugerido: result.preco_sugerido,
+            estrategia: result.status,
+            custo_base: Number(custoBase),
+            frete_fixo: Number(freteFixo),
+            comissao_marketplace: Number(comissaoPct) / 100,
+            fator_eve: evePct / 100
+          });
 
-        const { data: insertData, error: insertError } = await supabase.from('historico_buscas').insert({
-          user_id: session.user.id,
-          produto_alvo: productName || "Sem Produto", 
-          concorrente: competitorName || "Voo Cego",
-          preco_concorrente: anchor,
-          margem_desejada: Number(margemPct),
-          preco_sugerido: result.preco_sugerido,
-          estrategia: result.status, // Adicionado a coluna obrigatória que faltava
-          custo_base: Number(custoBase),
-          frete_fixo: Number(freteFixo),
-          comissao_marketplace: Number(comissaoPct) / 100,
-          fator_eve: evePct / 100
-        }).select();
-
-        if (insertError) {
-          console.error("ERRO DO SUPABASE:", insertError);
-          alert("Erro ao salvar no banco: " + insertError.message);
-        } else {
-          console.log("Salvo com sucesso!", insertData);
+          if (insertError) {
+            console.warn("Aviso ao salvar histórico no Supabase:", insertError.message);
+          }
         }
+      } catch (supabaseErr) {
+        console.warn("Histórico não salvo (Supabase indisponível):", supabaseErr);
       }
 
       onResult(result);
