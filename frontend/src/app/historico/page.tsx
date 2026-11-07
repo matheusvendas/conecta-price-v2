@@ -34,6 +34,7 @@ export default function HistoricoPage() {
       const { data, error } = await supabase
         .from('historico_buscas')
         .select('*')
+        .eq('user_id', session.user.id)
         .order('criado_em', { ascending: false });
 
       if (error) {

@@ -5,14 +5,17 @@ Ponto de entrada da aplicação FastAPI.
 Configura CORS, carrega variáveis de ambiente e registra os routers.
 """
 
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from app.routers import market, pricing
 
-# Carrega o .env da raiz do projeto (Pricing/.env)
-# O dotenv procura automaticamente nos diretórios pai.
+# Carrega o .env tanto de backend/.env quanto da raiz Pricing_v2/.env, independente do CWD
+_BACKEND_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(_BACKEND_DIR / ".env")
+load_dotenv(_BACKEND_DIR.parent / ".env")
 load_dotenv()
 
 app = FastAPI(
@@ -28,15 +31,11 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────
-# Permite requisições do frontend Next.js em desenvolvimento.
+# Permite requisições do frontend Next.js em desenvolvimento e produção.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "*"
-        # "http://localhost:3000",   # Next.js dev server
-        # "http://127.0.0.1:3000",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

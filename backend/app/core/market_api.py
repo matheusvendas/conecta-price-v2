@@ -1,9 +1,13 @@
 import requests
 import os
+from pathlib import Path
 import pandas as pd
 from typing import Optional
 from dotenv import load_dotenv
 
+_BACKEND_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(_BACKEND_DIR / ".env")
+load_dotenv(_BACKEND_DIR.parent / ".env")
 load_dotenv()
 
 def buscar_preco_concorrente(nome_produto: str, localizacao: str = "") -> Optional[pd.DataFrame]:
@@ -18,7 +22,7 @@ def buscar_preco_concorrente(nome_produto: str, localizacao: str = "") -> Option
         Um DataFrame Pandas bruto com os produtos encontrados (a filtragem de blacklist ocorre no tratar_df),
         ou None em caso de falha ou ausência de dados.
     """
-    api_key = os.getenv("SERPAPI_KEY")
+    api_key = os.getenv("SERPER_API_KEY") or os.getenv("SERPAPI_KEY")
     url = "https://google.serper.dev/shopping"
     
     parametros = {

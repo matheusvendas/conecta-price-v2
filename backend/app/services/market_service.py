@@ -10,6 +10,7 @@ import sys
 import os
 import json
 import requests
+import pandas as pd
 from pathlib import Path
 from typing import Optional
 from loguru import logger
@@ -170,12 +171,14 @@ def buscar_e_tratar(
     # 3. Converter para lista de dicts serializável (DTO)
     produtos = []
     for _, row in df_limpo.iterrows():
+        raw_link = row.get("link")
+        raw_img = row.get("imageUrl")
         produtos.append({
             "title": str(row.get("title", "")),
             "source": str(row.get("source", "")),
             "price": float(row["price_limpo"]),
-            "link": row.get("link") if row.get("link") is not None else None,
-            "image_url": row.get("imageUrl") if row.get("imageUrl") is not None else None,
+            "link": str(raw_link) if pd.notna(raw_link) and raw_link is not None else None,
+            "image_url": str(raw_img) if pd.notna(raw_img) and raw_img is not None else None,
         })
 
     # 4. LLM Batch Curator (Condicional)

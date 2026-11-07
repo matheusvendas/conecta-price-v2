@@ -6,7 +6,9 @@ import type {
 } from "@/types";
 
 // Diretriz 4: URL da API vem de variável de ambiente, sem hardcode.
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+).replace(/\/+$/, "");
 
 /**
  * POST /api/v1/market/search
@@ -15,11 +17,18 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export async function searchMarket(
   body: MarketSearchRequest
 ): Promise<MarketSearchResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/market/search`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/v1/market/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error(
+      `Não foi possível conectar ao backend em ${API_BASE}. Verifique se o servidor FastAPI está rodando na porta 8000.`
+    );
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => null);
@@ -38,11 +47,18 @@ export async function searchMarket(
 export async function calculatePricing(
   body: PricingRequest
 ): Promise<PricingResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/pricing/calculate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/v1/pricing/calculate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error(
+      `Não foi possível conectar ao backend em ${API_BASE}. Verifique se o servidor FastAPI está rodando na porta 8000.`
+    );
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => null);

@@ -10,6 +10,9 @@ def calcular_preco_ideal(
 ) -> Dict[str, Any]:
     
     # 1) Calcular Limites Internos
+    if taxa_comissao >= 1.0 or (taxa_comissao + margem_alvo) >= 1.0:
+        return {"mensagem": "Erro: Taxas somam 100% ou mais. Inviável matematicamente."}
+
     try:
         piso = (custo_base + frete_fixo) / (1.0 - taxa_comissao)
         preco_com_margem = (custo_base + frete_fixo) / (1.0 - taxa_comissao - margem_alvo)

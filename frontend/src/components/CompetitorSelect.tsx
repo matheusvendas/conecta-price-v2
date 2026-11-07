@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { MarketProduct } from "@/types";
 
 interface CompetitorSelectProps {
@@ -13,6 +13,11 @@ export default function CompetitorSelect({
   onConfirm,
 }: CompetitorSelectProps) {
   const [selectedIndexes, setSelectedIndexes] = useState<Set<number>>(new Set());
+
+  // Reseta a seleção sempre que uma nova lista de produtos chegar
+  useEffect(() => {
+    setSelectedIndexes(new Set());
+  }, [produtos]);
 
   const toggleSelection = (index: number) => {
     setSelectedIndexes((prev) => {
@@ -34,14 +39,17 @@ export default function CompetitorSelect({
     }
   };
 
-  // Diretriz 3: Proteção contra divisão por zero / NaN.
+  // Diretriz 3: Proteção contra divisão por zero / NaN e índices fora de alcance.
   const anchor: number | null = useMemo(() => {
-    if (selectedIndexes.size === 0) return null;
-    const total = Array.from(selectedIndexes).reduce(
+    const validIndexes = Array.from(selectedIndexes).filter(
+      (idx) => produtos[idx] !== undefined
+    );
+    if (validIndexes.length === 0) return null;
+    const total = validIndexes.reduce(
       (sum, idx) => sum + produtos[idx].price,
       0
     );
-    return Math.round((total / selectedIndexes.size) * 100) / 100;
+    return Math.round((total / validIndexes.length) * 100) / 100;
   }, [selectedIndexes, produtos]);
 
   return (

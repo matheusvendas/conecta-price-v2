@@ -26,6 +26,12 @@ export default function PricingForm({ anchor, productName, competitorName, onRes
     setLoading(true);
     setError(null);
 
+    if (Number(comissaoPct) + Number(margemPct) >= 100) {
+      setError("A soma da Comissão do Marketplace e da Margem Alvo deve ser menor que 100%.");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Diretriz 2: Conversão de porcentagem inteira para decimal no submit
       const result = await calculatePricing({
